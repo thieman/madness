@@ -1,0 +1,35 @@
+{
+    "name": "Overall Winner",
+    "left": [
+        {
+            "name": "Winner Left 1",
+            "left": [
+                {"name": "Winner Left 3"},
+                {"name": "Winner Left 4"}
+            ]
+        },
+        {
+            "name": "Winner Left 2",
+            "left": [
+                {"name": "Winner Left 5"},
+                {"name": "Winner Left 6"}
+            ]
+        }
+    ],
+    "right": [
+        {
+            "name": "Winner Right 1",
+            "right": [
+                {"name": "Winner Right 3"},
+                {"name": "Winner Right 4"}
+            ]
+        },
+        {
+            "name": "Winner Right 2",
+            "right": [
+                {"name": "Winner Right 5"},
+                {"name": "Winner Right 6"}
+            ]
+        }
+    ]
+}
