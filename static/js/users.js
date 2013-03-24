@@ -8,7 +8,13 @@ function initUserGrid() {
         svg.selectAll('.user')
             .data(users)
             .enter().append('image')
-            .attr('xlink:href', function(d) { return 'http://www.gravatar.com/avatar/' + d.gravatar_hash + '?s=80&d=wavatar'; })
+            .attr('xlink:href', function(d) {
+                if ('img' in d) {
+                    return '/static/img/' + d.img;
+                } else {
+                    return 'http://www.gravatar.com/avatar/' + d.gravatar_hash + '?s=80&d=wavatar';
+                }
+            })
             .attr('class', 'user')
             .attr('name', function(d) { return d.name; })
             .attr('width', userImageSize)
@@ -16,6 +22,7 @@ function initUserGrid() {
             .attr('x', function(d) { return ( (d.order % userGridRowSize) * (userGridSpacing + userImageSize) ); })
             .attr('y', function(d) { return ( Math.floor(d.order / userGridRowSize) * (userGridSpacing + userImageSize)); })
             .attr('rx', 5).attr('ry', 5)
+            .style('cursor', 'pointer')
             .on('click', userClickHandler);
 
     });

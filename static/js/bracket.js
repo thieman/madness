@@ -51,8 +51,8 @@ function drawBracket() {
 function update(source) {
 
 	var nodes = toArray(source);
-
 	nodes.forEach(function(d) { d.y = d.depth * 90 + bhWidth; });
+    nodes.forEach(function(d) { d.showActual = (d.name !== (d.actual ? d.actual : null)); });
 
 	var node = vis.selectAll('g.node')
 		.data(nodes, function(d) { return d.id || (d.id = ++i); });
@@ -68,14 +68,37 @@ function update(source) {
         .style('fill', function(d) { return d._children ? 'lightsteelblue' : '#fff'; });
 
 	nodeEnter.append('text')
-		.attr('dy', function(d) { return d.seed ? 3 : 14; })
-		.attr('dx', function(d) { return d.seed ? 15 * (d.isRight ? 1 : -1) : 0; })
+		.attr('dy', function(d) { return d.seed ? 4 : 14; })
+		.attr('dx', function(d) { return d.seed ? 13 * (d.isRight ? 1 : -1) : 0; })
 		.attr('text-anchor', function(d) { return d.seed ? (d.isRight ? 'start' : 'end') : 'middle'; })
-		.attr('text-decoration', function(d) { return d.eliminated ? 'line-through' : 'normal'; })
+        .attr('text-decoration', function(d) {
+            if (d.eliminated & (d.name !== (d.actual ? d.actual : null))) {
+                return 'line-through';
+            } else {
+                return 'normal';
+            }
+        })
 		.style('font-weight', function(d) { return d.winner ? 'bold' : 'normal'; })
-		.style('fill', function(d) { return d.winner ? '#090' : (d.eliminated ? '#900' : 'black'); })
+		.style('fill', function(d) {
+            if (!d.eliminated & 'seed' in d) {
+                return '#090';
+            }
+            else if (d.name === (d.actual ? d.actual : null)) {
+                return '#090';
+            } else if (d.eliminated) {
+                return '#900';
+            }
+        })
 		.text(function(d) { return d.name; })
 		.style('fill-opacity', 1e-6);
+
+    nodeEnter.append('text')
+        .attr('dy', 26)
+        .attr('dx', 0)
+        .attr('text-anchor', 'middle')
+        .style('fill', '#666')
+        .text(function(d) { return d.showActual ? d.actual : null; })
+        .style('fill-opacity', 1);
 
 	var nodeUpdate = node.transition()
 		.duration(duration)
