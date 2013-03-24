@@ -1,4 +1,5 @@
 import os
+from operator import itemgetter
 
 from flask import Flask, render_template, jsonify
 import pymongo
@@ -43,12 +44,15 @@ def get_user_json():
         mark_actuals(bracket, losses)
         mark_winners(bracket, losses)
 
-        # if rec['name'] == 'Phil Sarin':
-        rec['score'] = get_user_score(bracket, 7, True)
+        rec['score'] = get_user_score(bracket, 7)
 
         rec['order'] = idx
         del rec['_id']
         users.append(rec)
+
+    sorted_users = sorted(users, key=itemgetter('score'), reverse=True)
+    for idx, user in enumerate(sorted_users):
+        user['rank'] = idx
 
     return jsonify(users=users)
 

@@ -1,13 +1,27 @@
 var userState = 'grid';
+var userSort = 'constant';
 
 function initUserGrid() {
     d3.json('/users', function(json) {
 
         var users = json.users;
+        users.forEach(function(d) {
+            d.gridX = ( (d.order % userGridRowSize) * (userGridSpacing + userImageSize) );
+            d.gridY = Math.floor(d.order / userGridRowSize) * (userGridSpacing + userImageSize);
+            d.rankedX = ( (d.rank % userGridRowSize) * (userGridSpacing + userImageSize) );
+            d.rankedY = Math.floor(d.rank / userGridRowSize) * (userGridSpacing + userImageSize);
+        });
 
-        svg.selectAll('.user')
+        var userJoin = svg.selectAll('.user')
             .data(users)
-            .enter().append('image')
+            .enter().append('g')
+            .attr('class', 'user')
+            .attr('name', function(d) { return d.name; })
+            .attr('transform', function(d) { return 'translate(' + d.gridX + ',' + d.gridY + ')'; })
+            .style('cursor', 'pointer')
+            .on('click', userClickHandler);
+
+        userJoin.append('image')
             .attr('xlink:href', function(d) {
                 if ('img' in d) {
                     return '/static/img/' + d.img;
@@ -15,15 +29,22 @@ function initUserGrid() {
                     return 'http://www.gravatar.com/avatar/' + d.gravatar_hash + '?s=80&d=wavatar';
                 }
             })
-            .attr('class', 'user')
-            .attr('name', function(d) { return d.name; })
+            .attr('class', 'user-image')
             .attr('width', userImageSize)
             .attr('height', userImageSize)
-            .attr('x', function(d) { return ( (d.order % userGridRowSize) * (userGridSpacing + userImageSize) ); })
-            .attr('y', function(d) { return ( Math.floor(d.order / userGridRowSize) * (userGridSpacing + userImageSize)); })
-            .attr('rx', 5).attr('ry', 5)
-            .style('cursor', 'pointer')
-            .on('click', userClickHandler);
+            .attr('rx', 5).attr('ry', 5);
+
+        userJoin.append('text')
+            .attr('dx', userImageSize - 35)
+            .attr('dy', userImageSize - 5)
+            .text(function(d) { return d.score; })
+            .attr('font-size', 32)
+            .attr('class', 'user-score')
+            .style('font-weight', 'bold')
+            .style('fill', 'white')
+            .style('stroke', 'black')
+            .style('stroke-width', 0.5)
+            .style('fill-opacity', 1);
 
     });
 }
@@ -45,31 +66,46 @@ function userClickHandler(datum) {
         svg.selectAll('.user[focused=true]')
             .transition()
             .duration(500)
-            .attr('x', 0)
-            .attr('y', 0)
+            .attr('transform', 'translate(0,0)')
             .each('end', function(datum) { showUserCaption(datum); drawBracket(); });
 
         svg.selectAll('.user[focused=false]')
-        .transition()
-        .duration(500)
-        .attr('x', -1 * userImageSize)
-        .attr('y', -1 * userImageSize);
+            .transition()
+            .duration(500)
+            .attr('transform', 'translate(' + -1 * userImageSize + ',' + -1 * userImageSize + ')');
 
     } else if (userState == 'collapsed') {
 
         userState = 'grid';
-
-        svg.selectAll('.user')
-            .transition()
-        .duration(500)
-        .attr('x', function(d) { return ( (d.order % userGridRowSize) * (userGridSpacing + userImageSize) ); })
-        .attr('y', function(d) { return ( Math.floor(d.order / userGridRowSize) * (userGridSpacing + userImageSize)); });
-
+        refreshUserGrid();
         removeUserCaption();
         removeBracket();
 
     }
 
+}
+
+function refreshUserGrid() {
+
+    if (userSort === 'constant') {
+        svg.selectAll('.user')
+            .transition()
+            .duration(500)
+            .attr('transform', function(d) { return 'translate(' + d.gridX + ',' + d.gridY + ')'; });
+    } else if (userSort === 'ranked') {
+        svg.selectAll('.user')
+            .transition()
+            .duration(500)
+            .attr('transform', function(d) { return 'translate(' + d.rankedX + ',' + d.rankedY + ')'; });
+    }
+
+}
+
+function changeUserSortMethod(newState) {
+    userSort = newState;
+    if (userState === 'grid') {
+        refreshUserGrid();
+    }
 }
 
 function showUserCaption(datum) {
@@ -82,7 +118,7 @@ function showUserCaption(datum) {
         .attr('text-anchor', 'left')
         .attr('font-size', 50)
         .attr('opacity', 0)
-        .text(function(d) { return d.name + ' : ' + d.score + ' Points'; });
+        .text(function(d) { return d.name; });
 
     svg.selectAll('.user-caption')
         .transition(250)
