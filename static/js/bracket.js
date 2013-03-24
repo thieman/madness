@@ -78,7 +78,13 @@ function update(source) {
                 return 'normal';
             }
         })
-		.style('font-weight', function(d) { return d.winner ? 'bold' : 'normal'; })
+        .style('font-weight', function(d) {
+            if (d.winner & (d.name === d.actual ? d.actual : d.name)) {
+                return 'bold';
+            } else {
+                return 'normal';
+            }
+        })
 		.style('fill', function(d) {
             if (!d.eliminated & 'seed' in d) {
                 return '#090';
