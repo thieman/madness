@@ -169,5 +169,5 @@ def team_lost_game(game_doc, losses):
     return False if game_not_played else game_doc.get('eliminated', False)
 
 if __name__ == '__main__':
-    app.debug = True
+    app.debug = False
     app.run(host='0.0.0.0', port=APP_PORT)
